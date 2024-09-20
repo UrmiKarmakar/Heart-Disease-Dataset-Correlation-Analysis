@@ -1,51 +1,16 @@
 install.packages("ggplot2")
 install.packages("corrplot")
 install.packages("dplyr")
-install.packages("gridExtra")
 install.packages("fmsb")
 
 library(ggplot2)
 library(corrplot)
 library(dplyr)
-library(gridExtra)
 library(fmsb)
 
 heart_data <- read.csv("E:/heart.csv", header = TRUE, sep = ",")
 head(heart_data)
 str(heart_data)
-
-grid.arrange(
-  ggplotGrob(ggplot(heart_data, aes(x = age)) +
-               geom_histogram(binwidth = 5, fill = "skyblue", color = "black") +
-               labs(title = "Histogram of Age", x = "Age", y = "Frequency") +
-               theme_minimal()),
-  
-  ggplotGrob(ggplot(heart_data, aes(x = chol)) +
-               geom_histogram(binwidth = 20, fill = "salmon", color = "black") +
-               labs(title = "Histogram of Cholesterol Levels", x = "Cholesterol", y = "Frequency") +
-               theme_minimal()),
-  
-  ggplotGrob(ggplot(heart_data, aes(x = as.factor(sex))) +
-               geom_bar(fill = "lightblue", color = "black") +
-               labs(title = "Bar Graph of Sex Distribution", x = "Sex", y = "Count") +
-               theme_minimal()),
-  
-  ggplotGrob(ggplot(heart_data, aes(x = as.factor(cp))) +
-               geom_bar(fill = "lightcoral", color = "black") +
-               labs(title = "Bar Graph of Chest Pain Type", x = "Chest Pain Type", y = "Count") +
-               theme_minimal()),
-  
-  ggplotGrob(ggplot(heart_data, aes(x = as.factor(target), y = chol, fill = as.factor(target))) +
-               geom_boxplot() +
-               labs(title = "Box Plot of Cholesterol", x = "Heart Disease", y = "Cholesterol") +
-               theme_minimal()),
-  
-  ggplotGrob(ggplot(heart_data, aes(x = as.factor(target), y = thalach, fill = as.factor(target))) +
-               geom_boxplot() +
-               labs(title = "Box Plot of Max Heart Rate", x = "Heart Disease", y = "Max Heart Rate") +
-               theme_minimal()),
-  ncol = 2
-)
 
 target_var <- 'target'
 pearson_cor <- cor(heart_data, method = "pearson", use = "complete.obs")
@@ -74,7 +39,6 @@ ggplot(negative_correlations, aes(x = reorder(Variable, Correlation), y = Correl
   coord_flip() +
   labs(title = "Negative Correlations with Target", x = "Variables", y = "Correlation Coefficient (r)") +
   theme_minimal()
-
 
 ggplot(zero_correlations, aes(x = reorder(Variable, Correlation), y = Correlation)) +
   geom_point(color = "black", size = 3) +
@@ -141,25 +105,6 @@ ggplot(heart_data, aes(x = as.factor(target), y = chol, fill = as.factor(target)
   geom_violin() +
   labs(title = "Violin Plot of Cholesterol Levels by Heart Disease Status", x = "Heart Disease", y = "Cholesterol") +
   theme_minimal()
-
-radar_data <- heart_data %>%
-  select(age, chol, trestbps, thalach) %>%
-  summarise(across(everything(), mean, na.rm = TRUE)) %>%
-  as.data.frame()
-
-radar_data <- rbind(rep(max(radar_data, na.rm = TRUE), ncol(radar_data)), 
-                    rep(min(radar_data, na.rm = TRUE), ncol(radar_data)),
-                    radar_data)
-radar_labels <- colnames(radar_data)
-radar_data <- as.data.frame(radar_data)
-colnames(radar_data) <- radar_labels
-
-radarchart(radar_data, axistype = 1, 
-           pcol = "blue", pfcol = "lightblue", # Using single color for one data set
-           plwd = 2, cglcol = "grey", cglty = 1, 
-           axislabcol = "black", 
-           caxislabels = round(seq(min(radar_data), max(radar_data), length.out = 5), 1), # Proper axis labels
-           title = "Radar Chart for Patient Features")
 
 ggplot(heart_data, aes(x = age, y = thalach, group = 1)) +
   geom_line(color = "blue") +
